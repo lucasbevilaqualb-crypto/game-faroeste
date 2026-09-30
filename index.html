@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0e06">
+<title>Faroeste World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; width: 100%; height: 100%; overflow: hidden; background: #1a0e06;
+    overscroll-behavior: none; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+  #stage { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; overflow: hidden; }
+  canvas#game {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    image-rendering: pixelated; image-rendering: crisp-edges; background: #000;
+    outline: 4px solid #5a3417;
+  }
+
+  /* ---------- controles de toque ---------- */
+  #touch { position: absolute; inset: 0; pointer-events: none; display: none; font-family: "Press Start 2P", monospace; }
+  body.is-touch #touch { display: block; }
+  #touch > * { pointer-events: auto; touch-action: none; }
+
+  #dpad {
+    position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom));
+    width: 168px; height: 168px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,214,120,.22), rgba(90,52,23,.45));
+    border: 3px solid rgba(255,220,150,.55);
+  }
+  #dpad i {
+    position: absolute; width: 0; height: 0; border: 14px solid transparent; opacity: .8;
+  }
+  #dpad .l { left: 12px; top: 56px; border-right-color: #ffe9b0; }
+  #dpad .r { right: 12px; top: 56px; border-left-color: #ffe9b0; }
+  #dpad .d { left: 56px; bottom: 12px; border-top-color: #ffe9b0; }
+  #dpad .knob {
+    position: absolute; left: 54px; top: 54px; width: 60px; height: 60px; border-radius: 50%;
+    background: rgba(255,214,120,.5); border: 3px solid rgba(255,240,190,.8); transition: transform .04s;
+  }
+
+  .btn {
+    position: absolute; border-radius: 50%; color: #fff6d8; font-size: 8px; flex-direction: column; display: flex; align-items: center;
+    justify-content: center; text-align: center; line-height: 1.2;
+    background: radial-gradient(circle at 35% 30%, rgba(255,190,90,.75), rgba(150,70,20,.7));
+    border: 3px solid rgba(255,235,180,.8); text-shadow: 2px 2px 0 #4a2a12;
+  }
+  .btn.on { background: radial-gradient(circle at 35% 30%, rgba(255,240,170,.95), rgba(220,120,30,.9)); transform: scale(.94); }
+  #bJump { right: max(20px, env(safe-area-inset-right)); bottom: max(46px, env(safe-area-inset-bottom)); width: 92px; height: 92px; }
+  .btn b { font-size: 22px; margin-bottom: 4px; font-weight: normal; }
+  #bRun  { right: calc(max(20px, env(safe-area-inset-right)) + 108px); bottom: max(20px, env(safe-area-inset-bottom)); width: 72px; height: 72px; }
+  .mini {
+    position: absolute; top: max(8px, env(safe-area-inset-top)); width: 44px; height: 44px; border-radius: 10px; font-size: 16px;
+    background: rgba(40,20,8,.55); border: 2px solid rgba(255,220,150,.6); color: #fff2c8;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #bPause { right: max(10px, env(safe-area-inset-right)); }
+  #bMute  { right: calc(max(10px, env(safe-area-inset-right)) + 54px); }
+  #bFull  { right: calc(max(10px, env(safe-area-inset-right)) + 108px); }
+
+  /* ---------- aviso "gire o aparelho" (só se não conseguiu girar sozinho) ---------- */
+  #rotateHint {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column;
+    background: #1a0e06; color: #ffd23a; font-family: "Press Start 2P", monospace; font-size: 12px; text-align: center; gap: 18px; line-height: 1.6; z-index: 5;
+  }
+  #rotateHint .ph { width: 56px; height: 96px; border: 4px solid #ffd23a; border-radius: 10px; animation: spin 2.2s ease-in-out infinite; }
+  @keyframes spin { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" width="512" height="448"></canvas>
+
+  <div id="touch">
+    <div id="dpad">
+      <i class="l"></i><i class="r"></i><i class="d"></i>
+      <div class="knob"></div>
+    </div>
+    <div class="btn" id="bRun" data-key="ShiftLeft"><b>B</b>CORRER</div>
+    <div class="btn" id="bJump" data-key="Space"><b>A</b>PULAR</div>
+    <div class="mini" id="bFull">⛶</div>
+    <div class="mini" id="bMute" data-tap="KeyM">♪</div>
+    <div class="mini" id="bPause" data-tap="KeyP">II</div>
+  </div>
+  <div id="rotateHint"><div class="ph"></div><div>GIRE O CELULAR<br>PARA JOGAR DEITADO</div></div>
+</div>
+<script src="src/touch.js"></script>
+<script src="src/sprites.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/levels.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>
