@@ -89,9 +89,9 @@ function level1() {
   decor(a, 'cactus', 148, 12); decor(a, 'cactus', 177, 12);
 
   // sala secreta (cano)
-  const b = mkArea(26, 'under');
-  terrain(b, 0, 26, 12);
-  for (let x = 0; x < 26; x++) { setT(b, x, 0, T.STONE); setT(b, x, 1, T.STONE); }
+  const b = mkArea(31, 'under');
+  terrain(b, 0, 31, 12);
+  for (let x = 0; x < 31; x++) { setT(b, x, 0, T.STONE); setT(b, x, 1, T.STONE); }
   coins(b, 5, 10, 8); coins(b, 6, 8, 6); coins(b, 7, 6, 4); coins(b, 13, 10, 5);
   blk(b, 10, 8, T.QUEST, 'coin'); blk(b, 11, 8, T.BRICK, 'coins');
   const bp = pipe(b, 22, 12, 2);

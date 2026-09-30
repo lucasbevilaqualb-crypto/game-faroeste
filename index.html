@@ -22,6 +22,7 @@
     image-rendering: pixelated; image-rendering: crisp-edges; background: #000;
     outline: 4px solid #5a3417;
   }
+  canvas#game.full { outline: none; }
 
   /* ---------- controles de toque ---------- */
   #touch { position: absolute; inset: 0; pointer-events: none; display: none; font-family: "Press Start 2P", monospace; }
@@ -84,7 +85,7 @@
     </div>
     <div class="btn" id="bRun" data-key="ShiftLeft"><b>B</b>CORRER</div>
     <div class="btn" id="bJump" data-key="Space"><b>A</b>PULAR</div>
-    <div class="mini" id="bFull">⛶</div>
+    <div class="mini" id="bFull">F</div>
     <div class="mini" id="bMute" data-tap="KeyM">♪</div>
     <div class="mini" id="bPause" data-tap="KeyP">II</div>
   </div>

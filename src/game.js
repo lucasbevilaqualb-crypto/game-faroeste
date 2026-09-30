@@ -1,6 +1,8 @@
 'use strict';
 (() => {
-const VW = 256, VH = 224, TS = 16;
+let VW = 256;
+const VH = 224, TS = 16;
+let CX = 256, CW = 512; // centro e largura do canvas em pixels reais (mudam no modo tela larga)
 const cv = document.getElementById('game');
 const ctx = cv.getContext('2d');
 const TOUCH = !!window.IS_TOUCH;
@@ -825,21 +827,22 @@ function drawHUD() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   const Y = 10;
+  const pad = window.HUD_PAD || 0;
   text('VIDAS x' + G.lives, 14, Y, 8, '#fff2a0');
   text('$ ' + String(G.coins).padStart(2, '0'), 14, Y + 16, 8, '#ffd23a');
   for (let i = 0; i < 5; i++) {
     ctx.globalAlpha = i < G.dragon ? 1 : 0.28;
-    ctx.drawImage(SP.dcoin, 150 + i * 20, Y - 2, 15, 18);
+    ctx.drawImage(SP.dcoin, CX - 50 + i * 20 - 14 * 0, Y - 2, 15, 18);
   }
   ctx.globalAlpha = 1;
-  text('TEMPO', 372, Y, 8, '#fff2a0');
-  text(String(G.time).padStart(3, '0'), 372, Y + 16, 8, G.time <= 60 && (G.t >> 3) & 1 ? '#ff6a3a' : '#fff');
-  text(String(G.score).padStart(7, '0'), 498, Y + 16, 8, '#fff', 'right');
-  text(G.L ? 'FASE ' + G.level : '', 498, Y, 8, '#ffd23a', 'right');
+  text('TEMPO', CW - 140 - pad, Y, 8, '#fff2a0');
+  text(String(G.time).padStart(3, '0'), CW - 140 - pad, Y + 16, 8, G.time <= 60 && (G.t >> 3) & 1 ? '#ff6a3a' : '#fff');
+  text(String(G.score).padStart(7, '0'), CW - 14 - pad, Y + 16, 8, '#fff', 'right');
+  text(G.L ? 'FASE ' + G.level : '', CW - 14 - pad, Y, 8, '#ffd23a', 'right');
   if (G.msg && G.state === 'play') {
-    ctx.fillStyle = 'rgba(30,16,6,.88)'; ctx.fillRect(40, 340, 432, 22 + G.msg.length * 18);
-    ctx.strokeStyle = '#e0a558'; ctx.lineWidth = 3; ctx.strokeRect(41, 341, 430, 20 + G.msg.length * 18);
-    G.msg.forEach((ln, i) => text(ln, 256, 352 + i * 18, 8, '#fff2a0', 'center', null));
+    ctx.fillStyle = 'rgba(30,16,6,.88)'; ctx.fillRect(CX - 216, 340, 432, 22 + G.msg.length * 18);
+    ctx.strokeStyle = '#e0a558'; ctx.lineWidth = 3; ctx.strokeRect(CX - 215, 341, 430, 20 + G.msg.length * 18);
+    G.msg.forEach((ln, i) => text(ln, CX, 352 + i * 18, 8, '#fff2a0', 'center', null));
   }
 }
 function drawPopups() {
@@ -851,58 +854,59 @@ function drawPopups() {
 }
 function drawIntro() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = '#1a0e06'; ctx.fillRect(0, 0, 512, 448);
-  text('FASE ' + G.level, 256, 150, 20, '#ffd23a', 'center');
-  text(G.L.name, 256, 200, 12, '#f0b47c', 'center');
-  text('VIDAS x' + G.lives, 256, 270, 12, '#fff', 'center');
+  ctx.fillStyle = '#1a0e06'; ctx.fillRect(0, 0, CW, 448);
+  text('FASE ' + G.level, CX, 150, 20, '#ffd23a', 'center');
+  text(G.L.name, CX, 200, 12, '#f0b47c', 'center');
+  text('VIDAS x' + G.lives, CX, 270, 12, '#fff', 'center');
   ctx.setTransform(4, 0, 0, 4, 0, 0); ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(SP.player.small.idle, 56, 82);
+  ctx.drawImage(SP.player.small.idle, CX / 4 - 8, 82);
 }
 function drawTitle() {
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.imageSmoothingEnabled = false;
   drawBG('day', G.t * 0.6);
   ctx.setTransform(2, 0, 0, 2, 0, 0);
   const set = buildTileset('day');
-  for (let x = 0; x < 17; x++) { ctx.drawImage(set[T.GROUND], x * 16 - ((G.t * 0.6) % 16), 192); ctx.drawImage(set[T.DIRT], x * 16 - ((G.t * 0.6) % 16), 208); }
+  for (let x = 0; x < VW / 16 + 2; x++) { ctx.drawImage(set[T.GROUND], x * 16 - ((G.t * 0.6) % 16), 192); ctx.drawImage(set[T.DIRT], x * 16 - ((G.t * 0.6) % 16), 208); }
   drawSpr(SP.horse[((G.t / 8) | 0) % 2], 60, 176);
   drawSpr(SP.player.small[((G.t / 8) | 0) % 2 ? 'run1' : 'run2'], 66, 166 - 4);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = 'rgba(30,16,6,.35)'; ctx.fillRect(0, 60, 512, 130);
-  text('FAROESTE', 256, 84, 34, '#ffd23a', 'center', '#5a2a0a');
-  text('WORLD', 256, 132, 34, '#ff8a1e', 'center', '#5a2a0a');
-  if ((G.t >> 5) & 1) text(TOUCH ? 'TOQUE PARA JOGAR' : 'APERTE ENTER', 256, 232, 14, '#fff', 'center');
+  ctx.fillStyle = 'rgba(30,16,6,.35)'; ctx.fillRect(0, 60, CW, 130);
+  text('FAROESTE', CX, 84, 34, '#ffd23a', 'center', '#5a2a0a');
+  text('WORLD', CX, 132, 34, '#ff8a1e', 'center', '#5a2a0a');
+  if ((G.t >> 5) & 1) text(TOUCH ? 'TOQUE PARA JOGAR' : 'APERTE ENTER', CX, 232, 14, '#fff', 'center');
   if (TOUCH) {
-    text('DIRECIONAL mover   A pular   B correr', 256, 330, 8, '#fff2a0', 'center');
-    text('BAIXO no cano = entrar', 256, 350, 8, '#fff2a0', 'center');
+    text('DIRECIONAL mover   A pular   B correr', CX, 330, 8, '#fff2a0', 'center');
+    text('BAIXO no cano = entrar', CX, 350, 8, '#fff2a0', 'center');
   } else {
-    text('SETAS/AD mover   Z/ESPACO pular   X/SHIFT correr', 256, 330, 8, '#fff2a0', 'center');
-    text('BAIXO no cano = entrar   P pausa   M som', 256, 350, 8, '#fff2a0', 'center');
+    text('SETAS/AD mover   Z/ESPACO pular   X/SHIFT correr', CX, 330, 8, '#fff2a0', 'center');
+    text('BAIXO no cano = entrar   P pausa   M som', CX, 350, 8, '#fff2a0', 'center');
   }
-  text('Pise nos bandidos, monte no cavalo, chegue na porteira!', 256, 384, 8, '#f0b47c', 'center');
+  if (!TOUCH) text('F = tela cheia', CX, 404, 8, '#fff2a0', 'center');
+  text('Pise nos bandidos, monte no cavalo, chegue na porteira!', CX, 384, 8, '#f0b47c', 'center');
 }
 function drawCenterCard(lines, sub) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = 'rgba(20,10,4,.82)'; ctx.fillRect(0, 130, 512, 190);
-  lines.forEach((l, i) => text(l, 256, 160 + i * 34, 18, i ? '#fff' : '#ffd23a', 'center'));
-  if (sub) text(sub, 256, 280, 9, '#f0b47c', 'center');
+  ctx.fillStyle = 'rgba(20,10,4,.82)'; ctx.fillRect(0, 130, CW, 190);
+  lines.forEach((l, i) => text(l, CX, 160 + i * 34, 18, i ? '#fff' : '#ffd23a', 'center'));
+  if (sub) text(sub, CX, 280, 9, '#f0b47c', 'center');
 }
 
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 512, 448);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, CW, 448);
   switch (G.state) {
     case 'title': drawTitle(); break;
     case 'intro': drawIntro(); break;
     case 'gameover': drawWorld(); drawHUD(); drawCenterCard(['FIM DE JOGO', 'Score ' + G.score], (TOUCH ? 'Toque para voltar ao inicio' : 'ENTER para voltar ao inicio')); break;
     case 'end': {
       ctx.setTransform(2, 0, 0, 2, 0, 0); drawBG('day', G.t * 0.5); ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = 'rgba(20,10,4,.6)'; ctx.fillRect(0, 60, 512, 300);
-      text('PARABENS, XERIFE!', 256, 90, 20, '#ffd23a', 'center');
-      text('Voce cruzou as 2 primeiras fases.', 256, 150, 10, '#fff', 'center');
-      text('Score: ' + G.score, 256, 190, 12, '#fff2a0', 'center');
-      text('Estrelas: ' + G.dragonTotal + ' / 10', 256, 220, 12, '#fff2a0', 'center');
-      text('Fim do prototipo - mais fases em breve', 256, 280, 9, '#f0b47c', 'center');
-      if ((G.t >> 5) & 1) text((TOUCH ? 'Toque para jogar de novo' : 'ENTER para jogar de novo'), 256, 320, 10, '#fff', 'center');
+      ctx.fillStyle = 'rgba(20,10,4,.6)'; ctx.fillRect(0, 60, CW, 300);
+      text('PARABENS, XERIFE!', CX, 90, 20, '#ffd23a', 'center');
+      text('Voce cruzou as 2 primeiras fases.', CX, 150, 10, '#fff', 'center');
+      text('Score: ' + G.score, CX, 190, 12, '#fff2a0', 'center');
+      text('Estrelas: ' + G.dragonTotal + ' / 10', CX, 220, 12, '#fff2a0', 'center');
+      text('Fim do prototipo - mais fases em breve', CX, 280, 9, '#f0b47c', 'center');
+      if ((G.t >> 5) & 1) text((TOUCH ? 'Toque para jogar de novo' : 'ENTER para jogar de novo'), CX, 320, 10, '#fff', 'center');
       break;
     }
     default: {
@@ -912,10 +916,20 @@ function render() {
         const ci = G.clearInfo;
         if (ci.phase >= 1) drawCenterCard(['FASE COMPLETA!', ci.hit ? 'Bonus da porteira ' + ci.bonus : 'Sem bonus da porteira'], 'Bonus de tempo +' + ci.tb * 50);
       }
-      if (G.fade > 0) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(0,0,0,' + G.fade + ')'; ctx.fillRect(0, 0, 512, 448); }
+      if (G.fade > 0) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = 'rgba(0,0,0,' + G.fade + ')'; ctx.fillRect(0, 0, CW, 448); }
     }
   }
 }
+
+// largura visível do mundo (modo tela larga mostra mais cenário dos lados)
+function setViewWidth(n) {
+  n = Math.max(256, Math.min(480, Math.round(n)));
+  if (n === VW && cv.width === n * 2) return;
+  VW = n; CX = n; CW = n * 2; cv.width = CW; cv.height = 448;
+  if (G.A) G.cam.x = Math.max(0, Math.min(G.cam.x, G.A.cols * TS - VW));
+}
+window.setViewWidth = setViewWidth;
+if (window.__wantView) setViewWidth(window.__wantView);
 
 // ---------------------------------------------------------------- main loop
 function step() {
