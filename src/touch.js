@@ -111,6 +111,7 @@
     const nx = dx / R, ny = dy / R;
     setDir('left', 'ArrowLeft', nx < -0.22);
     setDir('right', 'ArrowRight', nx > 0.22);
+    setDir('down', 'ArrowDown', ny > 0.5 && Math.abs(nx) < 0.7);
     const m = Math.min(1, Math.hypot(nx, ny)) * 34, a = Math.atan2(ny, nx);
     knob.style.transform = 'translate(' + (Math.cos(a) * m).toFixed(1) + 'px,' + (Math.sin(a) * m).toFixed(1) + 'px)';
   }
